@@ -6,15 +6,15 @@
 /// 1. http client wrapper [HttpClient]
 /// 2. json fetcher [HttpJsonFetcher]
 /// 3. cache [JsonCacheManager]
-
-import 'package:meta/meta.dart';
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 
 ///
 /// Universal fetcher for JSON by HTTP
@@ -216,7 +216,8 @@ class JsonCacheManager {
   Stream<String> readAsString(String url, {Map<String, String>? headers, nocache: false}) {
     StreamController<String>? oldController = _downloads[url];
 
-    if(oldController!=null && !oldController.isClosed) oldController.close(); // prev download started, drop it
+    // prev download started, return it
+    if(oldController!=null && !oldController.isClosed) return oldController.stream;
 
     StreamController<String> controller = StreamController();
     _downloads[url] = controller;

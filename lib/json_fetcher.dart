@@ -214,13 +214,7 @@ class JsonCacheManager {
 
   /// [nocache] skips cache before getting the file - i.e.get from Internet then cache it
   Stream<String> readAsString(String url, {Map<String, String>? headers, nocache: false}) {
-    StreamController<String>? oldController = _downloads[url];
-
-    // prev download started, return it
-    if(oldController!=null && !oldController.isClosed) return oldController.stream;
-
     StreamController<String> controller = StreamController.broadcast();
-    _downloads[url] = controller;
 
     void _getFile() async {
       try {
@@ -233,14 +227,22 @@ class JsonCacheManager {
               cachedString = await f.file.readAsString()); // cache
         }
 
-        //print("download $url start");
-        var webFile = await _cache.downloadFile(url, authHeaders: headers, force: true);
-        //print("download $url stop");
-        if (webFile != null && !controller.isClosed) {
-          final String onlineString = await webFile.file.readAsString();
-          if(onlineString != cachedString) // skip if a data the same
-            controller.add(onlineString);
-        } // online
+        StreamController<String>? oldController = _downloads[url];
+
+        // prev download started, return it
+        if(oldController!=null && !oldController.isClosed) {
+          await controller.addStream(oldController.stream);
+        } else {
+          //print("download $url start");
+          _downloads[url] = controller;
+          var webFile = await _cache.downloadFile(url, authHeaders: headers, force: true);
+          //print("download $url stop");
+          if (!controller.isClosed) {
+            final String onlineString = await webFile.file.readAsString();
+            if(onlineString != cachedString) // skip if a data the same
+              controller.add(onlineString);
+          } // online
+        }
       } catch (e, trace) {
         _log.severe("Failed to download file from $url", e, trace);
         if(!controller.isClosed) controller.addError(e);

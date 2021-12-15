@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:json_fetcher/json_fetcher.dart';
 import 'package:mock_web_server/mock_web_server.dart';
 
+import 'fake_path_provider.dart';
+
 final GET_TYPICALS_METHOD = "gettypicals"+DateTime.now().millisecond.toString();
 const TYPICAL_DATA1 = "data1";
 const TYPICAL_DATA2 = "data2";
@@ -48,6 +50,8 @@ class _TypicalFetcher extends HttpJsonFetcher<List<Typical>> {
 Stream<List<Typical>> fetchTypicals(String prefix) => _TypicalFetcher().fetch(prefix+GET_TYPICALS_METHOD);
 
 void main() {
+  setUpFakePathProvider();
+
   test('integration test of the cache (client + parser + cache)',() async {
     MockWebServer server = new MockWebServer(port: 8082);
     await server.start();

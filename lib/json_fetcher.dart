@@ -219,7 +219,7 @@ class JsonCacheManager {
     // prev download started, return it
     if(oldController!=null && !oldController.isClosed) return oldController.stream;
 
-    StreamController<String> controller = StreamController();
+    StreamController<String> controller = StreamController.broadcast();
     _downloads[url] = controller;
 
     void _getFile() async {

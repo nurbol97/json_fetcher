@@ -40,7 +40,7 @@ class LoggableHttpClient extends BaseClient {
     // Simple request
     if (request is Request) {
       final List<int> bytes = await response.stream.toBytes();
-      if (config.logOutputBody || response.statusCode>=400)
+      if (config.logOutputBody || response.statusCode >= 400)
         s +=
             "\nbody: ${await _smartCut(response.headers['Content-Type'] ?? response.headers['content-type'], utf8.decode(bytes))}";
       _logger.info(s);
@@ -53,8 +53,8 @@ class LoggableHttpClient extends BaseClient {
           persistentConnection: response.persistentConnection,
           reasonPhrase: response.reasonPhrase);
     }
-
-    _logger.info(s);
+    final List<int> bytes = await response.stream.toBytes();
+    _logger.info('$s $bytes');
 
     return response;
   }
@@ -109,10 +109,6 @@ class LoggableHttpClientConfig {
     this.cutLongBody = true,
   });
 
-  factory LoggableHttpClientConfig.full() => const LoggableHttpClientConfig(
-    logInputBody: true,
-    logOutputBody: true,
-    hideAuthorization: false,
-    cutLongBody: false
-  );
+  factory LoggableHttpClientConfig.full() =>
+      const LoggableHttpClientConfig(logInputBody: true, logOutputBody: true, hideAuthorization: false, cutLongBody: false);
 }
